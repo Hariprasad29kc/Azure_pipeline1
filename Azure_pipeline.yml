@@ -1,0 +1,53 @@
+trigger:
+- main
+
+pool:
+  vmImage: ubuntu-latest
+
+jobs:
+- job: Validate
+  displayName: Terraform Validate
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+  - task: TerraformInstaller@0
+    displayName: Install Terraform latest
+  - task: TerraformTaskV2@2
+    displayName: 'Terraform : Init'
+    inputs:
+      backendServiceArm: 'sc-devopspip'
+      backendAzureRmResourceGroupName: devops_terra_gr
+      backendAzureRmStorageAccountName: terraformkc29
+      backendAzureRmContainerName: tfstatedowd
+      backendAzureRmKey: terraform.tfstate
+  - task: TerraformTaskV2@2
+    displayName: 'Terraform : Validate'
+    inputs:
+      command: validate
+- job: Deploy
+  displayName: Terraform Deploy
+  pool:
+    vmImage: ubuntu-latest
+  steps:
+  - checkout: self
+  - task: TerraformInstaller@0
+    displayName: Install Terraform latest
+  - task: TerraformTaskV2@2
+    displayName: 'Terraform : Init'
+    inputs:
+      backendServiceArm: 'sc-devopspip'
+      backendAzureRmResourceGroupName: devops_terra_gr
+      backendAzureRmStorageAccountName: terraformkc29
+      backendAzureRmContainerName: tfstatedowd
+      backendAzureRmKey: terraform.tfstate
+  - task: TerraformTaskV2@2
+    displayName: 'Terraform : Plan'
+    inputs:
+      command: plan
+      environmentServiceNameAzureRM: 'sc-devopspip'
+  - task: TerraformTaskV2@2
+    displayName: 'Terraform : Validate and Apply'
+    inputs:
+      command: apply
+      environmentServiceNameAzureRM: 'sc-devopspip'
